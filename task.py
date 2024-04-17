@@ -1,5 +1,18 @@
 from collections import UserDict
 from datetime import datetime, timedelta
+import pickle
+
+def save_data(book, filename="addressbook.pkl"):
+    with open(filename, "wb") as f:
+        pickle.dump(book, f)
+
+
+def load_data(filename="addressbook.pkl"):
+    try:
+        with open(filename, "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return AddressBook()  # Повернення нової адресної книги, якщо файл не знайдено
 
 
 class Field:
@@ -170,15 +183,6 @@ def change_contact(args, book):
     if record is None:
         message = f"Contact [{name}] not found!"
     if old_phone and new_phone:
-        '''
-        add [ім'я] [телефон]: Додати або новий контакт з іменем та телефонним номером, 
-                                    або телефонний номер к контакту який вже існує.
-        change [ім'я] [новий телефон]: Змінити телефонний номер для вказаного контакту.
-        '''
-        # не зовсім зрозуміло з умов завдання, який саме номер змінити на новий, адже у запису може бути декілька номерів
-        # тобто є певна несумісність при обєднанні бота і класів з попередніх завдань
-        # тому я дещо зімпровізував
-        
         record.edit_phone(old_phone, new_phone)
     else:
         message = "Give me correct phones please."
@@ -208,9 +212,6 @@ def add_birthday(args, book):
     message = "Birthday added."
     
     if record is None:
-        # record = Record(name)
-        # book.add_record(record)
-        # message = "Birthday added."
         return "Contact not found! Enter new one."
     if birthday:
         record.add_birthday(birthday)
@@ -232,7 +233,7 @@ def birthdays(book):
 
 
 def main():
-    book = AddressBook()
+    book = load_data() # book = AddressBook()
     print("Welcome to the assistant bot!")
     while True:
         user_input = input("Enter a command: ")
@@ -259,6 +260,8 @@ def main():
             print(birthdays(book))         
         else:
             print("Invalid command.")
+
+    save_data(book)
 
 
 if __name__ == "__main__":
